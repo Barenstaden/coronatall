@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Antall smittede og døde av Covid-19 i Norge og verden - Coronatall</title>
+    <meta name="description" content="Hvor mange er smittet av koronaviruset i Norge og verden? Få oppdaterte tall hele døgnet!">
+    <link rel="preload" as="style" type="text/css" onload="this.onload=null;this.rel='stylesheet'" href="/css/bootstrap.min.css">
+    <link rel="preload" as="style" type="text/css" onload="this.onload=null;this.rel='stylesheet'" href="/css/chart.css">
+    <link rel="preload" as="style" type="text/css" onload="this.onload=null;this.rel='stylesheet'" href="/css/animate.css">
+    <link rel="preload" as="style" type="text/css" onload="this.onload=null;this.rel='stylesheet'" href="/css/master.css">
+
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/css/chart.css">
+    <link rel="stylesheet" href="/css/animate.css">
+    <link rel="stylesheet" href="/css/master.css">
+
+    <script async defer src="https://www.googletagmanager.com/gtag/js?id=UA-148810679-3"></script>
+    <script type="text/javascript">
+    if (location.protocol != 'http:') {
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'UA-148810679-3');
+    }
+    </script>
+    <style media="screen">
+      [v-cloak] { display: none; }
+    </style>
+
+  </head>
+  <body>
+    <div class="container-fluid main-content">
+      <div class="container" id="coronaNumbers" v-cloak>
+        <div class="row text-center">
+          <div class="col">
+            <h1 class="text-center d-none d-sm-block">Antall smittede og døde av Covid-19 i verden og Norge</h1>
+            <a href="/om">Om coronatall</a>
+          </div>
+        </div>
+        <div class="row text-center">
+
+
+          <!-- NOTE: SMITTEDE VERDEN -->
+          <div class="col-12 col-md-3 mt-5">
+            <h3>Antall smittede i verden</h3>
+            <h1 v-if="globalCoronaData">{{ formatNumber(globalCoronaData.total_cases) }}</h1>
+            <h6 v-if="globalCoronaData">{{ formatNumber(globalCoronaData.total_new_cases_today) }} nye i dag</h6>
+            <div v-else class="spinner-grow" role="status"></div>
+            <h6 :class="localCoronaData.total_cases - oldLocalCoronaData.total_cases != 0 ? 'animated pulse' : ''" v-if="oldGlobalCoronaData">{{ formatNumber(globalCoronaData.total_cases - oldGlobalCoronaData.total_cases) }} siden sist du sjekket</h6>
+          </div>
+
+
+          <!-- NOTE: DØDE VERDEN -->
+          <div class="col-12 col-md-3 mt-5">
+            <h3>Antall døde i verden</h3>
+            <h1 v-if="globalCoronaData">{{ formatNumber(globalCoronaData.total_deaths) }}</h1>
+            <h6 v-if="globalCoronaData">{{ formatNumber(globalCoronaData.total_new_deaths_today) }} nye i dag</h6>
+            <div v-else class="spinner-grow" role="status"></div>
+            <h6 :class="localCoronaData.total_cases - oldLocalCoronaData.total_cases != 0 ? 'animated pulse' : ''" v-if="oldGlobalCoronaData">{{ formatNumber(globalCoronaData.total_deaths - oldGlobalCoronaData.total_deaths) }} siden sist du sjekket</h6>
+          </div>
+
+
+          <!-- NOTE: SMITTEDE NORGE -->
+          <div class="col-12 col-md-3 mt-5">
+            <h3>Antall smittede i Norge</h3>
+            <h1 v-if="localCoronaData">{{ formatNumber(localCoronaData.total_cases) }}</h1>
+            <h6 v-if="localCoronaData">{{ formatNumber(localCoronaData.total_new_cases_today) }} nye i dag</h6>
+            <div v-else class="spinner-grow" role="status"></div>
+            <h6 :class="localCoronaData.total_cases - oldLocalCoronaData.total_cases != 0 ? 'animated pulse' : ''" v-if="oldLocalCoronaData">{{ formatNumber(localCoronaData.total_cases - oldLocalCoronaData.total_cases) }} siden sist du sjekket</h6>
+          </div>
+
+
+          <!-- NOTE: DØDE NORGE -->
+          <div class="col-12 col-md-3 mt-5">
+            <h3>Antall døde i Norge</h3>
+            <h1 v-if="localCoronaData">{{ formatNumber(localCoronaData.total_deaths) }}</h1>
+            <h6 v-if="localCoronaData">{{ formatNumber(localCoronaData.total_new_deaths_today) }} nye i dag</h6>
+            <div v-else class="spinner-grow" role="status"></div>
+            <h6 :class="localCoronaData.total_cases - oldLocalCoronaData.total_cases != 0 ? 'animated pulse' : ''" v-if="oldLocalCoronaData">{{ formatNumber(localCoronaData.total_deaths - oldLocalCoronaData.total_deaths) }} siden sist du sjekket</h6>
+          </div>
+        </div>
+        <div class="row justify-content-center mt-3">
+          <p>Sist oppdatert for {{timeNow}}</p>
+        </div>
+        <div class="row justify-content-center">
+          <button type="button" @click="fetchData()">
+            <span v-if="!updating">Sjekk igjen</span>
+            <span v-if="updating">Henter data...</span>
+          </button>
+        </div>
+        <div v-if="!signedOn" class="row justify-content-center mt-5">
+          <h3 v-if="!emailSent">Få oppdatert oversikt på e-post hver morgen!</h3>
+          <h3 v-else>E-post lagret!</h3>
+        </div>
+        <div v-if="!signedOn" class="row justify-content-center mt-3">
+          <input v-if="!emailSent" type="email" name="" value="" placeholder="E-post" v-model="email">
+          <button v-if="!emailSent" type="submit" name="button" @click="saveEmail()">Lagre</button>
+        </div>
+      </div>
+
+
+      <!-- <div class="row justify-content-center mt-5">
+        <h3>Få oppdaterte tall på e-post!</h3>
+      </div>
+      <div class="row justify-content-center mt-2">
+        <input type="email" v-model="email" value="" placeholder="E-post">
+        <button type="button">
+          Send
+        </button>
+      </div> -->
+
+      <div class="row justify-content-center mt-3">
+        <div class="col-12 col-md-9 col-lg-5 mb-5">
+          <div id="coronaTimeline" v-cloak>
+            <div class="row justify-content-center mt-3">
+              <h4>Antall smittede over tid</h4>
+            </div>
+            <div class="row justify-content-center">
+              <p>Trykk eller hold over grafen for detaljerte data</p>
+            </div>
+            <div class="row justify-content-center mt-1">
+              <div class="or-button">
+                <button type="button" @click="selectTimeline('global')" :class="global ? 'selected' : ''">Graf for verden</button>
+                <button type="button" @click="selectTimeline('local')" :class="local ? 'selected' : ''">Graf for Norge</button>
+              </div>
+            </div>
+            <div class="row d-block">
+              <canvas id="timeline-chart" class="mt-4"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="row justify-content-center">
+        <div class="col-12 col-md-6 mt-5">
+          <p>Coronatall.no henter data for antall smittede og døde av coronaviruset gjennom hele døgnet for Norge og verden. <a href="/om">Les mer om coronatall.no på om-siden</a></p>
+        </div>
+      </div>
+    </div>
+
+
+
+
+
+
+
+
+
+
+    <script defer src="/js/vue.js"></script>
+    <script defer src="/js/moment.min.js" charset="utf-8"></script>
+    <script defer src="/js/chart.min.js" charset="utf-8"></script>
+    <script defer src="/js/jquery.min.js"></script>
+    <script defer src="/js/bootstrap.min.js"></script>
+    <script defer src="/js/socket.io.slim.js" charset="utf-8"></script>
+    <script defer src="/js/main.js" charset="utf-8"></script>
+  </body>
+</html>

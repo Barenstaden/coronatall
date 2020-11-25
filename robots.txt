@@ -1,0 +1,6 @@
+User-Agent: *
+Disallow:
+Allow: /om
+Allow: /
+
+Sitemap: https://coronatal.no/sitemap.xml

@@ -1,0 +1,34 @@
+doctype html
+html
+  head
+    style
+      include ../style.css
+  body
+  div.main-content.mail-content
+    div.text-center.mt-5
+      h1 Oppdaterte coronatall for verden og norge
+    div.col-xs-12.col-md-5
+      h3 Antall smittede i verden
+      h1 #{data.totalInWorld}
+      h4 #{data.newInWorldToday} nye i dag
+      h5 #{data.worldSinceLast} siden forrige besøk på nettsiden
+    div.col-xs-12.col-md-5
+      h3 Antall døde i verden
+      h1 #{data.totalDeathsInWorld}
+      h4 #{data.newDeathsInWorldToday} nye i dag
+      h5 #{data.worldDeathsSinceLast} siden forrige besøk på nettsiden
+    div.col-xs-12.col-md-5
+      h3 Antall smittede i Norge
+      h1 #{data.totalInLocal}
+      h4 #{data.newInLocalToday} nye i dag
+      h5 #{data.localSinceLast} siden forrige besøk på nettsiden
+    div.col-xs-12.col-md-5
+      h3 Antall døde i Norge
+      h1 #{data.totalDeathsInLocal}
+      h4 #{data.newDeathsInLocalToday} nye i dag
+      h5 #{data.localDeathsSinceLast} siden forrige besøk på nettsiden
+    br
+    div.mt-5
+      a(href="https://coronatall.no/", class="button") Se alle oppdaterte tall
+
+    include ../footer.pug
